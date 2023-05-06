@@ -97,6 +97,24 @@ const createChatManager = (options: {
   };
 };
 
+const createScrollManager = () => {
+  let neededCallback: (() => Element | null) | null;
+  return {
+    scrollIfNeeded() {
+      if (neededCallback) {
+        const e = neededCallback();
+        if (e) {
+          e.scrollIntoView({ behavior: "smooth" });
+        }
+        neededCallback = null;
+      }
+    },
+    needScroll(callback: () => Element | null) {
+      neededCallback = callback;
+    },
+  };
+};
+
 async function doGetSession(): Promise<Session> {
   return (
     await fetch("/session", {
@@ -163,6 +181,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const titleElement = document.querySelector<HTMLTitleElement>("title");
   const navbarTogglerElement = document.querySelector<HTMLButtonElement>(".navbar-toggler");
   const nicknameElement = document.querySelector<HTMLSpanElement>("#nickname");
+  const mainElement = document.querySelector<HTMLElement>("main");
   const sendFormElement = document.querySelector<HTMLFormElement>("#send-form");
   const sendFormMessageElement = document.querySelector<HTMLTextAreaElement>("#send-form *[name=message]");
   const chatListElement = document.querySelector<HTMLUListElement>("#chat-list");
@@ -171,6 +190,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   assert(titleElement);
   assert(navbarTogglerElement);
   assert(nicknameElement);
+  assert(mainElement);
   assert(sendFormElement);
   assert(sendFormMessageElement);
   assert(chatListElement);
@@ -189,12 +209,19 @@ window.addEventListener("DOMContentLoaded", async () => {
   navbarTogglerElement.insertAdjacentHTML("afterbegin", avatar(session.nickname, { blackout: false }));
   nicknameElement.innerText = session.nickname;
 
+  const scroll = createScrollManager();
+
   const chat = createChatManager({
     limit: query.limit,
     loadNewerCallback: (newerChat) => {
+      const scrollMargin = 16;
+      if (mainElement.scrollTop + scrollMargin >= mainElement.scrollHeight - mainElement.clientHeight) {
+        scroll.needScroll(() => chatListElement.firstElementChild);
+      }
       for (let i = newerChat.length - 1; i >= 0; i--) {
         chatListElement.insertBefore(createChatEntityElement(newerChat[i]), chatListElement.firstChild);
       }
+      scroll.scrollIfNeeded();
     },
     loadOlderCallback: (olderChat) => {
       for (let i = 0; i < olderChat.length; i++) {
@@ -213,6 +240,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     sendFormElement.reset();
     sendFormMessageElement.focus();
     adjustHTMLTextareaElementHeight(sendFormMessageElement);
+
+    const firstElement = chatListElement.firstElementChild;
+    scroll.needScroll(() => (firstElement ? firstElement.previousElementSibling : chatListElement.firstElementChild));
     await chat.loadNewer();
   });
 
@@ -226,6 +256,9 @@ window.addEventListener("DOMContentLoaded", async () => {
   });
 
   adjustHTMLTextareaElementHeight(sendFormMessageElement);
+
   await chat.loadOlder();
+  scroll.needScroll(() => chatListElement.firstElementChild);
+  scroll.scrollIfNeeded();
   setInterval(async () => await chat.loadNewer(), query.interval);
 });
