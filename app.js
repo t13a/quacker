@@ -1,6 +1,20 @@
 const cookieSession = require("cookie-session");
 const express = require("express");
 const path = require("path");
+const sqlite3 = require("sqlite3").verbose();
+
+const db = new sqlite3.Database("db.sqlite3", (err) => {
+  if (err) {
+    console.error(err.message);
+  } else {
+    db.run(`CREATE TABLE IF NOT EXISTS chat (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      message TEXT,
+      created_by TEXT,
+      created_at INTEGER DEFAULT (strftime('%s','now'))
+    )`);
+  }
+});
 
 const app = express();
 const port = 3000;
