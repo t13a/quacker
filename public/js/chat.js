@@ -25,16 +25,20 @@ const createChatManager = (options) => {
   const allChat = [];
   return {
     async loadNewer() {
-      const newest = allChat.length > 0 ? allChat[0].id : 0;
-      const newerChat = await doGetChat({ from: newest + 1, to: newest + options.limit, limit: options.limit });
-      allChat.unshift(...newerChat);
-      options.loadNewerCallback(newerChat);
+      await withLock("loadNewer", async () => {
+        const newest = allChat.length > 0 ? allChat[0].id : 0;
+        const newerChat = await doGetChat({ from: newest + 1, to: newest + options.limit, limit: options.limit });
+        allChat.unshift(...newerChat);
+        options.loadNewerCallback(newerChat);
+      });
     },
     async loadOlder() {
-      const oldest = allChat.length > 0 ? allChat[allChat.length - 1].id : 0;
-      const olderChat = await doGetChat({ from: 0, to: oldest - 1, limit: options.limit });
-      allChat.push(...olderChat);
-      options.loadOlderCallback(olderChat);
+      await withLock("loadOlder", async () => {
+        const oldest = allChat.length > 0 ? allChat[allChat.length - 1].id : 0;
+        const olderChat = await doGetChat({ from: 0, to: oldest - 1, limit: options.limit });
+        allChat.push(...olderChat);
+        options.loadOlderCallback(olderChat);
+      });
     },
   };
 };
@@ -74,6 +78,21 @@ const formatCreatedAt = (() => {
   return (createdAt) => dtf.format(new Date(createdAt * 1000));
 })();
 
+const withLock = (() => {
+  const state = {};
+  return async (key, callback) => {
+    if (state[key]) {
+      return;
+    }
+    state[key] = true;
+    try {
+      await callback();
+    } finally {
+      delete state[key];
+    }
+  };
+})();
+
 window.addEventListener("DOMContentLoaded", async () => {
   const sendFormElement = document.querySelector(".send-form");
   const sendFormMessageElement = document.querySelector(".send-form *[name=message]");
@@ -83,6 +102,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const query = (() => {
     const params = new URL(window.location.href).searchParams;
     return {
+      interval: parseInt(params.get("interval")) || 3 * 1000,
       limit: parseInt(params.get("limit")) || 10,
     };
   })();
@@ -118,4 +138,5 @@ window.addEventListener("DOMContentLoaded", async () => {
   });
 
   await chat.loadOlder();
+  setInterval(async () => await chat.loadNewer(), query.interval);
 });
