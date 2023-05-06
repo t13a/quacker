@@ -99,16 +99,23 @@ app.get("/logout", (req, res) => {
 });
 
 app.get("/chat", async (req, res) => {
-  if (isLoggedIn(req)) {
-    const query = {
-      from: !isNaN(parseInt(req.query.from)) ? parseInt(req.query.from) : 1,
-      to: !isNaN(parseInt(req.query.to)) ? parseInt(req.query.to) : -1,
-      limit: !isNaN(parseInt(req.query.limit)) ? parseInt(req.query.limit) : 10,
-    };
-    const chat = await doGetChat(req.session.nickname, query);
-    res.render("chat", { session: req.session, query: query, chat: chat });
+  if (req.accepts(["json", "html"]) === "json") {
+    if (isLoggedIn(req)) {
+      const chat = await doGetChat(req.session.nickname, {
+        from: !isNaN(parseInt(req.query.from)) ? parseInt(req.query.from) : 0,
+        to: !isNaN(parseInt(req.query.to)) ? parseInt(req.query.to) : -1,
+        limit: !isNaN(parseInt(req.query.limit)) ? parseInt(req.query.limit) : 10,
+      });
+      res.json(chat);
+    } else {
+      res.status(401).json("Unauthorized");
+    }
   } else {
-    res.redirect("/login");
+    if (isLoggedIn(req)) {
+      res.render("chat", { session: req.session });
+    } else {
+      res.redirect("/login");
+    }
   }
 });
 

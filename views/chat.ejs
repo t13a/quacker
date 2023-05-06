@@ -25,46 +25,7 @@
           <input type="submit" value="Send" />
         </div>
       </form>
-      <ul class="chat-list">
-        <!-- prettier-ignore -->
-        <%
-        const dtf = new Intl.DateTimeFormat("sv-SE", {
-            year: "numeric",
-            month: "numeric",
-            day: "numeric",
-            hour: "numeric",
-            minute: "numeric",
-            hour12: false,
-        });
-        for (let i = 0; i < chat.length; i++) {
-        %>
-        <li>
-          <div class="created_by"><%= chat[i].created_by %></div>
-          <div class="created_at"><%= dtf.format(new Date(chat[i].created_at * 1000)) %></div>
-          <p class="message"><%= chat[i].message %></p>
-        </li>
-        <% } %>
-      </ul>
-      <% if(chat.length > 0) { %>
-      <p>
-        <!-- prettier-ignore -->
-        <%
-        const newest = chat[0].id;
-        const oldest = chat[chat.length - 1].id;
-        if(newest == query.to) {
-        %>
-        <a href="/chat?to=<%= newest + query.limit %>&limit=<%= query.limit %>">Prev</a>
-        <% } else { %>
-        <span>Prev</span>
-        <% } %>
-        <span>|</span>
-        <% if(oldest > 1) { %>
-        <a href="/chat?to=<%= oldest - 1 %>&limit=<%= query.limit %>">Next</a>
-        <% } else { %>
-        <span>Next</span>
-        <% } %>
-      </p>
-      <% } %>
+      <ul class="chat-list"></ul>
     </main>
     <footer>
       <address>&copy; 2023 <a href="https://github.com/t13a">Tatsuya Kitagawa</a></address>
