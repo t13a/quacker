@@ -11,6 +11,7 @@
       <div class="container-fluid">
         <h1 class="h1 ms-1 mb-0 font-script">Quacker</h1>
         <button
+          tabindex="4"
           class="navbar-toggler avatar m-0 p-0 border-0 rounded-circle"
           type="button"
           data-bs-toggle="collapse"
@@ -29,12 +30,21 @@
     </nav>
     <div class="order-3 p-2 border border-top">
       <form id="send-form" class="input-group">
-        <textarea name="message" placeholder="Type a message" rows="1" autofocus required maxlength="280" class="form-control resize-none"></textarea>
-        <button class="btn btn-primary"><i class="bi bi-send"></i></button>
+        <textarea
+          name="message"
+          placeholder="Type a message"
+          rows="1"
+          autofocus
+          required
+          maxlength="280"
+          tabindex="2"
+          class="form-control resize-none"
+        ></textarea>
+        <button tabindex="3" class="btn btn-primary"><i class="bi bi-send"></i></button>
       </form>
     </div>
     <main class="order-2 h-100 overflow-hidden position-relative">
-      <div id="main-body" class="h-100 overflow-y-auto">
+      <div id="main-body" tabindex="1" class="h-100 overflow-y-auto outline-none-focus">
         <div class="d-flex flex-column-reverse mw-md mx-auto px-2 pt-2">
           <ul id="chat-list" class="d-flex flex-column-reverse m-0 p-0"></ul>
           <div id="load-more" class="mb-2 text-center">

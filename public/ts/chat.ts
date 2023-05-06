@@ -344,8 +344,8 @@ window.addEventListener("DOMContentLoaded", async () => {
     e.preventDefault();
     await doPostChat(sendFormMessageElement.value);
     sendFormElement.reset();
-    sendFormMessageElement.focus();
     adjustHTMLTextareaElementHeight(sendFormMessageElement);
+    mainBodyElement.focus();
 
     const firstElement = chatListElement.firstElementChild;
     scroll.needScroll(() => (firstElement ? firstElement.previousElementSibling : chatListElement.firstElementChild));
@@ -363,6 +363,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   });
 
   adjustHTMLTextareaElementHeight(sendFormMessageElement);
+  mainBodyElement.focus();
 
   await chat.loadOlder();
   scroll.needScroll(() => chatListElement.firstElementChild);

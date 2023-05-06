@@ -8,6 +8,10 @@
   width: 3rem;
 }
 
+.outline-none-focus:focus {
+  outline: none;
+}
+
 .font-script {
   font-family: "Bad Script";
 }
