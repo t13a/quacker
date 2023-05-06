@@ -99,12 +99,13 @@ app.get("/logout", (req, res) => {
 
 app.get("/chat", async (req, res) => {
   if (isLoggedIn(req)) {
-    const chat = await doGetChat(req.session.nickname, {
+    const query = {
       from: !isNaN(parseInt(req.query.from)) ? parseInt(req.query.from) : 1,
       to: !isNaN(parseInt(req.query.to)) ? parseInt(req.query.to) : -1,
       limit: !isNaN(parseInt(req.query.limit)) ? parseInt(req.query.limit) : 10,
-    });
-    res.render("chat", { session: req.session, chat: chat });
+    };
+    const chat = await doGetChat(req.session.nickname, query);
+    res.render("chat", { session: req.session, query: query, chat: chat });
   } else {
     res.redirect("/login");
   }

@@ -44,6 +44,26 @@
         </li>
         <% } %>
       </ul>
+      <% if(chat.length > 0) { %>
+      <p>
+        <!-- prettier-ignore -->
+        <%
+        const newest = chat[0].id;
+        const oldest = chat[chat.length - 1].id;
+        if(newest == query.to) {
+        %>
+        <a href="/chat?to=<%= newest + query.limit %>&limit=<%= query.limit %>">Prev</a>
+        <% } else { %>
+        <span>Prev</span>
+        <% } %>
+        <span>|</span>
+        <% if(oldest > 1) { %>
+        <a href="/chat?to=<%= oldest - 1 %>&limit=<%= query.limit %>">Next</a>
+        <% } else { %>
+        <span>Next</span>
+        <% } %>
+      </p>
+      <% } %>
     </main>
     <footer>
       <address>&copy; 2023 <a href="https://github.com/t13a">Tatsuya Kitagawa</a></address>
