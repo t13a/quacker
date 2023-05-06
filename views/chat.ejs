@@ -25,29 +25,24 @@
         </div>
       </form>
       <ul class="chat-list">
+        <!-- prettier-ignore -->
+        <%
+        const dtf = new Intl.DateTimeFormat("sv-SE", {
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+            hour12: false,
+        });
+        for (let i = 0; i < chat.length; i++) {
+        %>
         <li>
-          <div class="created_by">Foo</div>
-          <div class="created_at">2023-03-03 33:33</div>
-          <p class="message">Sample text.</p>
+          <div class="created_by"><%= chat[i].created_by %></div>
+          <div class="created_at"><%= dtf.format(new Date(chat[i].created_at * 1000)) %></div>
+          <p class="message"><%= chat[i].message %></p>
         </li>
-        <li>
-          <div class="created_by">Bar</div>
-          <div class="created_at">2023-03-03 22:22</div>
-          <!-- prettier-ignore -->
-          <p class="message">Sample text with new line.
-Sample text with new line.
-    Sample text with new line.
-        Sample text with new line.
-            Sample text with new line.
-                Sample text with new line.</p>
-        </li>
-        <li>
-          <!-- prettier-ignore -->
-          <div class="created_by">Very very very very very very very very very very very very very long name</div>
-          <div class="created_at">2023-01-01 11:11</div>
-          <!-- prettier-ignore -->
-          <p class="message">Very long long long long long long long long long long long long long long long long long long long long long long long long long text.</p>
-        </li>
+        <% } %>
       </ul>
     </main>
     <footer>

@@ -39,6 +39,19 @@ function logout(req) {
   req.session = null;
 }
 
+async function doGetChat(nickname) {
+  console.log(`doGetChat: ${nickname}`);
+  return new Promise((resolve, reject) => {
+    db.all("SELECT * FROM chat ORDER BY id DESC LIMIT 10", (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+    });
+  });
+}
+
 async function doPostChat(nickname, message) {
   console.log(`doPostChat: ${nickname}: ${JSON.stringify(message)}`);
   return new Promise((resolve, reject) => {
@@ -78,9 +91,10 @@ app.get("/logout", (req, res) => {
   res.redirect("/");
 });
 
-app.get("/chat", (req, res) => {
+app.get("/chat", async (req, res) => {
   if (isLoggedIn(req)) {
-    res.render("chat", { session: req.session });
+    const chat = await doGetChat(req.session.nickname);
+    res.render("chat", { session: req.session, chat: chat });
   } else {
     res.redirect("/login");
   }
