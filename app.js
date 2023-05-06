@@ -16,6 +16,11 @@ function login(req) {
   req.session.nickname = req.body.nickname;
 }
 
+function logout(req) {
+  console.log(`logout: ${JSON.stringify(req.session.nickname)}`);
+  req.session = null;
+}
+
 app.get("/", (req, res) => {
   res.redirect("/login");
 });
@@ -30,6 +35,7 @@ app.post("/login", (req, res) => {
 });
 
 app.get("/logout", (req, res) => {
+  logout(req);
   res.redirect("/");
 });
 
