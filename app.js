@@ -39,16 +39,22 @@ function logout(req) {
   req.session = null;
 }
 
-async function doGetChat(nickname, options = { limit: 10 }) {
+async function doGetChat(nickname, options = { from: 0, to: -1, limit: 10 }) {
   console.log(`doGetChat: ${nickname}: ${JSON.stringify(options)}`);
   return new Promise((resolve, reject) => {
-    db.all("SELECT * FROM chat ORDER BY id DESC LIMIT ?", options.limit, (err, rows) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(rows);
+    db.all(
+      "SELECT * FROM chat WHERE id BETWEEN ? AND ? ORDER BY id DESC LIMIT ?",
+      options.from,
+      options.to >= 0 ? options.to : Math.pow(2, 63) - 1,
+      options.limit,
+      (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(rows);
+        }
       }
-    });
+    );
   });
 }
 
@@ -94,6 +100,8 @@ app.get("/logout", (req, res) => {
 app.get("/chat", async (req, res) => {
   if (isLoggedIn(req)) {
     const chat = await doGetChat(req.session.nickname, {
+      from: !isNaN(parseInt(req.query.from)) ? parseInt(req.query.from) : 1,
+      to: !isNaN(parseInt(req.query.to)) ? parseInt(req.query.to) : -1,
       limit: !isNaN(parseInt(req.query.limit)) ? parseInt(req.query.limit) : 10,
     });
     res.render("chat", { session: req.session, chat: chat });
