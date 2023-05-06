@@ -4,6 +4,17 @@ $btn-bg: #000;
 $btn-fg: #fff;
 $bdr: #ccc;
 
+%content-block {
+  margin: 1em auto;
+  padding: 1em;
+  text-align: left;
+}
+
+%rounded-border {
+  border-radius: 0.5em;
+  border: 1px solid $bdr;
+}
+
 body {
   text-align: center;
 }
@@ -11,9 +22,8 @@ body {
 input[type="submit"],
 input[type="text"],
 textarea {
+  @extend %rounded-border;
   background: $bg;
-  border-radius: 0.5em;
-  border: 1px solid $bdr;
   box-sizing: border-box;
   color: $fg;
   margin: 0.5em 0;
@@ -29,16 +39,6 @@ input[type="submit"] {
   padding: 0.75em;
 }
 
-.chat-list li,
-.login-form,
-.send-form {
-  border-radius: 0.5em;
-  border: 1px solid $bdr;
-  margin: 1em auto;
-  padding: 1em;
-  text-align: left;
-}
-
 .chat-list {
   display: block;
   margin: 0;
@@ -47,6 +47,8 @@ input[type="submit"] {
 }
 
 .chat-list li {
+  @extend %content-block;
+  @extend %rounded-border;
   display: block;
   max-width: 40em;
 }
@@ -78,6 +80,8 @@ input[type="submit"] {
 }
 
 .login-form {
+  @extend %content-block;
+  @extend %rounded-border;
   max-width: 20em;
 }
 
@@ -86,5 +90,7 @@ input[type="submit"] {
 }
 
 .send-form {
+  @extend %content-block;
+  @extend %rounded-border;
   max-width: 40em;
 }
