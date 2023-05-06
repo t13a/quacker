@@ -18,5 +18,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   sendFormElement.addEventListener("submit", async (e) => {
     e.preventDefault();
     await doPostChat(sendFormMessageElement.value);
+    sendFormElement.reset();
+    sendFormMessageElement.focus();
   });
 });
