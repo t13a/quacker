@@ -39,6 +39,19 @@ function logout(req) {
   req.session = null;
 }
 
+async function doPostChat(nickname, message) {
+  console.log(`doPostChat: ${nickname}: ${JSON.stringify(message)}`);
+  return new Promise((resolve, reject) => {
+    db.run("INSERT INTO chat (message, created_by) values (?, ?)", message, nickname, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
+}
+
 app.get("/", (req, res) => {
   if (isLoggedIn(req)) {
     res.redirect("/chat");
@@ -73,8 +86,9 @@ app.get("/chat", (req, res) => {
   }
 });
 
-app.post("/chat", (req, res) => {
+app.post("/chat", async (req, res) => {
   if (isLoggedIn(req)) {
+    await doPostChat(req.session.nickname, req.body.message);
     res.redirect("/chat");
   } else {
     res.status(401).send("Unauthorized");
