@@ -23,6 +23,15 @@ module.exports = {
         test: /\.s[ac]ss$/i,
         use: ["style-loader", "css-loader", "sass-loader"],
       },
+      {
+        test: /public\/.*\.ts$/,
+        use: {
+          loader: "ts-loader",
+          options: {
+            configFile: "public/tsconfig.json",
+          },
+        },
+      },
     ],
   },
   plugins: [new webpack.HotModuleReplacementPlugin()],
