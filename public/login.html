@@ -6,21 +6,21 @@
     <script src="js/login.bundle.js"></script>
     <title>Quacker</title>
   </head>
-  <body>
+  <body class="vh-100 d-flex flex-column text-center">
     <header>
-      <h1>Quacker</h1>
+      <h1 class="mt-5 mb-1 display-1 font-script">Quacker</h1>
     </header>
-    <main>
-      <h2>Hi, anonymous.<span class="duck">&#x1f986;</span></h2>
-      <p>Let's talk freely without registration.</p>
-      <form class="login-form" action="/login" method="POST">
-        <div class="avatar"></div>
-        <div>
+    <main class="my-auto p-3">
+      <h2 class="font-script">Hi, anonymous.<span class="ms-2 h1">&#x1f986;</span></h2>
+      <p class="lead">Let's talk freely without registration.</p>
+      <form action="/login" method="POST" class="position-relative mw-md-half mx-auto mt-5 pt-5 border-top border-secondary">
+        <div class="avatar position-absolute top-0 start-50 translate-middle"></div>
+        <div class="mb-3 w-100 form-floating">
+          <input type="text" name="nickname" placeholder="Nickname" autofocus required maxlength="31" class="form-control" />
           <label for="nickname">Nickname</label>
-          <input type="text" name="nickname" placeholder="Nickname" autofocus required maxlength="31" />
         </div>
         <div>
-          <input type="submit" value="Login" />
+          <input type="submit" value="Login" class="btn btn-primary w-100" />
         </div>
       </form>
     </main>

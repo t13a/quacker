@@ -1,144 +1,32 @@
+@use "sass:math";
 @import "bootstrap/scss/bootstrap";
 
-$bg: #fff;
-$fg: #000;
-$btn-bg: #000;
-$btn-fg: #fff;
-$bdr: #ccc;
-
-$avatar-margin: 1em;
-$avatar-size: 3em;
-
-%avatar {
-  height: $avatar-size;
-  left: $avatar-margin;
-  margin: 0;
-  padding: 0;
-  position: absolute;
-  top: $avatar-margin;
-  width: $avatar-size;
+.avatar,
+.avatar > svg {
+  height: 3rem;
+  width: 3rem;
 }
 
-%content-block {
-  margin: 1em auto;
-  padding: 1em;
-  text-align: left;
-}
-
-%rounded-border {
-  border-radius: 0.5em;
-  border: 1px solid $bdr;
-}
-
-@mixin card($width) {
-  @extend %content-block;
-  @extend %rounded-border;
-  @if $width == narrow {
-    max-width: 20em;
-  } @else {
-    max-width: 40em;
-  }
-}
-
-@mixin card-avatar($width) {
-  @extend %content-block;
-  @extend %rounded-border;
-  @if $width == narrow {
-    max-width: 20em - $avatar-size - $avatar-margin;
-  } @else {
-    max-width: 40em - $avatar-size - $avatar-margin;
-  }
-  min-height: $avatar-size;
-  padding-left: $avatar-size + $avatar-margin * 2;
-  position: relative;
-}
-
-body {
-  text-align: center;
-}
-
-h1,
-h2 {
+.font-script {
   font-family: "Bad Script";
 }
 
-input[type="submit"],
-input[type="text"],
-textarea {
-  @extend %rounded-border;
-  background: $bg;
-  box-sizing: border-box;
-  color: $fg;
-  margin: 0.5em 0;
-  padding: 0.5em;
-  width: 100%;
+.mw-md {
+  max-width: map-get($grid-breakpoints, md);
 }
 
-input[type="submit"] {
-  background: $btn-bg;
-  border: none;
-  color: $btn-fg;
-  font-weight: bold;
-  padding: 0.75em;
+.mw-md-half {
+  max-width: math.div(map-get($grid-breakpoints, md), 2);
 }
 
-.chat-list {
-  display: block;
-  margin: 0;
-  padding: 0;
-  text-align: left;
-
-  li {
-    @include card-avatar(default);
-    display: block;
-
-    .avatar {
-      @extend %avatar;
-    }
-
-    .created_by {
-      display: inline;
-      font-weight: bold;
-    }
-
-    .created_at::before {
-      content: "\00b7";
-      margin: 0 0.25em;
-    }
-
-    .created_at {
-      color: lighten($fg, 50%);
-      display: inline;
-    }
-
-    .message {
-      margin: 0;
-      overflow: scroll;
-      white-space: pre-wrap;
-    }
-  }
+.overflow-x-auto {
+  overflow-x: auto;
 }
 
-.duck {
-  font-size: 1.5em;
-  margin-left: 0.25em;
+.resize-none {
+  resize: none;
 }
 
-.login-form {
-  @include card-avatar(narrow);
-
-  .avatar {
-    @extend %avatar;
-    background-color: $bdr;
-    border-radius: 100%;
-    margin-top: 1.25em;
-  }
-}
-
-.nickname {
-  font-weight: bold;
-}
-
-.send-form {
-  @include card(default);
+.white-space-pre-wrap {
+  white-space: pre-wrap;
 }

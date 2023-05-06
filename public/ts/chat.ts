@@ -21,29 +21,39 @@ function assert(value: any): asserts value {
 
 function createChatEntityElement(entity: ChatEntity) {
   const e = document.createElement("li");
+  e.classList.add("d-flex", "position-relative", "mb-2");
 
   const avatarElement = document.createElement("div");
-  avatarElement.className = "avatar";
+  avatarElement.classList.add("avatar", "position-absolute");
   avatarElement.insertAdjacentHTML("afterbegin", avatar(entity.created_by, { blackout: false }));
   assert(avatarElement.firstElementChild);
   avatarElement.firstElementChild.removeAttribute("width");
   avatarElement.firstElementChild.removeAttribute("height");
   e.appendChild(avatarElement);
 
-  const createdByElement = document.createElement("div");
-  createdByElement.className = "created_by";
-  createdByElement.innerText = entity.created_by;
-  e.appendChild(createdByElement);
+  const bubbleElement = document.createElement("div");
+  bubbleElement.classList.add("overflow-hidden", "px-3", "py-2", "border", "rounded", "shadow-sm", "bg-white");
+  bubbleElement.style.marginLeft = "3.5rem";
+  e.appendChild(bubbleElement);
 
-  const createdAtElement = document.createElement("div");
-  createdAtElement.className = "created_at";
+  const headerElement = document.createElement("div");
+  headerElement.classList.add("d-flex", "mx-0", "my-1", "p-0");
+  bubbleElement.appendChild(headerElement);
+
+  const createdByElement = document.createElement("strong");
+  createdByElement.classList.add("d-inline-block", "me-auto", "text-nowrap", "text-truncate");
+  createdByElement.innerText = entity.created_by;
+  headerElement.appendChild(createdByElement);
+
+  const createdAtElement = document.createElement("span");
+  createdAtElement.classList.add("ms-2", "text-nowrap", "text-secondary");
   createdAtElement.innerText = formatCreatedAt(entity.created_at);
-  e.appendChild(createdAtElement);
+  headerElement.appendChild(createdAtElement);
 
   const messageElement = document.createElement("p");
-  messageElement.className = "message";
+  messageElement.classList.add("m-0", "pb-1", "overflow-x-auto", "white-space-pre-wrap");
   messageElement.innerText = entity.message;
-  e.appendChild(messageElement);
+  bubbleElement.appendChild(messageElement);
 
   return e;
 }
@@ -138,11 +148,11 @@ const withLock = (() => {
 
 window.addEventListener("DOMContentLoaded", async () => {
   const titleElement = document.querySelector<HTMLTitleElement>("title");
-  const nicknameElement = document.querySelector<HTMLSpanElement>(".nickname");
-  const sendFormElement = document.querySelector<HTMLFormElement>(".send-form");
-  const sendFormMessageElement = document.querySelector<HTMLTextAreaElement>(".send-form *[name=message]");
-  const chatListElement = document.querySelector<HTMLUListElement>(".chat-list");
-  const loadMoreElement = document.querySelector<HTMLAnchorElement>(".chat-list + p a");
+  const nicknameElement = document.querySelector<HTMLSpanElement>("#nickname");
+  const sendFormElement = document.querySelector<HTMLFormElement>("#send-form");
+  const sendFormMessageElement = document.querySelector<HTMLTextAreaElement>("#send-form *[name=message]");
+  const chatListElement = document.querySelector<HTMLUListElement>("#chat-list");
+  const loadMoreElement = document.querySelector<HTMLAnchorElement>("#load-more");
 
   assert(titleElement);
   assert(nicknameElement);

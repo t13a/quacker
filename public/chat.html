@@ -6,26 +6,21 @@
     <script src="js/chat.bundle.js"></script>
     <title>Quacker</title>
   </head>
-  <body>
+  <body class="w-100 h-100 px-2 bg-light text-center">
     <header>
-      <h1>Quacker</h1>
+      <h1 class="mt-5 mb-1 display-1 font-script">Quacker</h1>
     </header>
     <main>
-      <h2>What are you doing now?<span class="duck">&#x1f986;</span></h2>
-      <p>You are logged in as <span class="nickname"></span>. To change your nickname, please <a href="/logout">logout</a>.</p>
-      <form class="send-form">
-        <div>
-          <label for="message">Message</label>
-        </div>
-        <div>
-          <textarea name="message" placeholder="Type a message" autofocus required maxlength="280"></textarea>
-        </div>
-        <div>
-          <input type="submit" value="Send" />
-        </div>
-      </form>
-      <ul class="chat-list"></ul>
-      <p><a href="#">Load more</a></p>
+      <h2 class="font-script">What are you doing now?<span class="ms-2 h1">&#x1f986;</span></h2>
+      <p>You are logged in as <span id="nickname"></span>. To change your nickname, please <a href="/logout">logout</a>.</p>
+      <div class="mw-md mx-auto mb-4 p-2 border rounded shadow-sm bg-white">
+        <form id="send-form" class="input-group">
+          <textarea name="message" placeholder="Type a message" autofocus required maxlength="280" class="form-control resize-none"></textarea>
+          <input type="submit" value="Send" class="btn btn-primary" />
+        </form>
+      </div>
+      <ul id="chat-list" class="d-block mw-md mx-auto p-0 text-start"></ul>
+      <p><a id="load-more" href="#">Load more</a></p>
     </main>
     <footer>
       <address>&copy; 2023 <a href="https://github.com/t13a">Tatsuya Kitagawa</a></address>
