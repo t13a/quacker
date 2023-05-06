@@ -14,6 +14,18 @@ interface Session {
   nickname: string;
 }
 
+function adjustHTMLTextareaElementHeight(e: HTMLTextAreaElement) {
+  e.style.height = "0px";
+
+  const clientHeight = e.clientHeight;
+  const scrollHeight = e.scrollHeight;
+  const paddingBottom = parseInt(window.getComputedStyle(e).getPropertyValue("padding-bottom"));
+  const paddingTop = parseInt(window.getComputedStyle(e).getPropertyValue("padding-top"));
+  const maxHeight = (clientHeight - paddingBottom - paddingTop) * 5 + paddingBottom + paddingTop;
+
+  e.style.height = `${scrollHeight < maxHeight ? scrollHeight : maxHeight}px`;
+}
+
 function assert(value: any): asserts value {
   if (!value) {
     throw new Error();
@@ -200,7 +212,12 @@ window.addEventListener("DOMContentLoaded", async () => {
     await doPostChat(sendFormMessageElement.value);
     sendFormElement.reset();
     sendFormMessageElement.focus();
+    adjustHTMLTextareaElementHeight(sendFormMessageElement);
     await chat.loadNewer();
+  });
+
+  sendFormMessageElement.addEventListener("input", (e) => {
+    adjustHTMLTextareaElementHeight(sendFormMessageElement);
   });
 
   loadMoreElement.addEventListener("click", async (e) => {
@@ -208,6 +225,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     await chat.loadOlder();
   });
 
+  adjustHTMLTextareaElementHeight(sendFormMessageElement);
   await chat.loadOlder();
   setInterval(async () => await chat.loadNewer(), query.interval);
 });
