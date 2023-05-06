@@ -1,4 +1,4 @@
-import "../css/style.css";
+import "../scss/style.scss";
 
 function createChatEntityElement(entity) {
   const e = document.createElement("li");
