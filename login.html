@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <link rel="stylesheet" href="./css/style.css" />
     <title>Quacker</title>
   </head>
   <body>
@@ -9,9 +10,9 @@
       <h1>Quacker</h1>
     </header>
     <main>
-      <h2>Hi, anonymous.<span>&#x1f986;</span></h2>
+      <h2>Hi, anonymous.<span class="duck">&#x1f986;</span></h2>
       <p>Let's talk freely without registration.</p>
-      <form action="chat.html" method="GET">
+      <form class="login-form" action="chat.html" method="GET">
         <div>
           <label for="nickname">Nickname</label>
           <input type="text" name="nickname" placeholder="Nickname" autofocus required maxlength="31" />
