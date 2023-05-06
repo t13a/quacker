@@ -20,6 +20,12 @@ module.exports = {
         use: ["style-loader", "css-loader"],
       },
       {
+        test: /\.m?js$/i,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
+      {
         test: /\.s[ac]ss$/i,
         use: ["style-loader", "css-loader", "sass-loader"],
       },

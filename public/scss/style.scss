@@ -4,6 +4,19 @@ $btn-bg: #000;
 $btn-fg: #fff;
 $bdr: #ccc;
 
+$avatar-margin: 1em;
+$avatar-size: 3em;
+
+%avatar {
+  height: $avatar-size;
+  left: $avatar-margin;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  top: $avatar-margin;
+  width: $avatar-size;
+}
+
 %content-block {
   margin: 1em auto;
   padding: 1em;
@@ -23,6 +36,19 @@ $bdr: #ccc;
   } @else {
     max-width: 40em;
   }
+}
+
+@mixin card-avatar($width) {
+  @extend %content-block;
+  @extend %rounded-border;
+  @if $width == narrow {
+    max-width: 20em - $avatar-size - $avatar-margin;
+  } @else {
+    max-width: 40em - $avatar-size - $avatar-margin;
+  }
+  min-height: $avatar-size;
+  padding-left: $avatar-size + $avatar-margin * 2;
+  position: relative;
 }
 
 body {
@@ -61,8 +87,12 @@ input[type="submit"] {
   text-align: left;
 
   li {
-    @include card(default);
+    @include card-avatar(default);
     display: block;
+
+    .avatar {
+      @extend %avatar;
+    }
 
     .created_by {
       display: inline;
@@ -93,7 +123,14 @@ input[type="submit"] {
 }
 
 .login-form {
-  @include card(narrow);
+  @include card-avatar(narrow);
+
+  .avatar {
+    @extend %avatar;
+    background-color: $bdr;
+    border-radius: 100%;
+    margin-top: 1.25em;
+  }
 }
 
 .nickname {
