@@ -162,6 +162,40 @@ const formatCreatedAt = (() => {
   return (createdAt: number) => dtf.format(new Date(createdAt * 1000));
 })();
 
+const observeLoadMore = (options: {
+  root: Element;
+  target: Element;
+  loadCallback: () => Promise<void>;
+  preLoadCallback: () => Promise<void>;
+  postLoadCallback: () => Promise<void>;
+}) => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(async (entry) => {
+        if (entry.isIntersecting) {
+          await options.preLoadCallback();
+          const scrollTop = options.root.scrollTop;
+          const oldScrollHeight = options.root.scrollHeight;
+          await options.loadCallback();
+          const newScrollHeight = options.root.scrollHeight;
+          options.root.scrollTo(0, scrollTop + newScrollHeight - oldScrollHeight);
+          await options.postLoadCallback();
+        }
+      });
+    },
+    {
+      root: options.root,
+      threshold: 1.0,
+    }
+  );
+  observer.observe(options.target);
+  return observer;
+};
+
+async function sleep(ms: number) {
+  await new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
+}
+
 const withLock = (() => {
   const state: { [key: string]: true } = {};
   return async (key: string, callback: () => Promise<void>) => {
@@ -185,7 +219,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const sendFormElement = document.querySelector<HTMLFormElement>("#send-form");
   const sendFormMessageElement = document.querySelector<HTMLTextAreaElement>("#send-form *[name=message]");
   const chatListElement = document.querySelector<HTMLUListElement>("#chat-list");
-  const loadMoreElement = document.querySelector<HTMLAnchorElement>("#load-more");
+  const loadMoreElement = document.querySelector<HTMLDivElement>("#load-more");
 
   assert(titleElement);
   assert(navbarTogglerElement);
@@ -228,8 +262,8 @@ window.addEventListener("DOMContentLoaded", async () => {
         chatListElement.appendChild(createChatEntityElement(olderChat[i]));
       }
       if (olderChat.length == 0 || olderChat[olderChat.length - 1].id == 1) {
-        assert(loadMoreElement.parentElement?.parentElement);
-        loadMoreElement.parentElement.parentElement.removeChild(loadMoreElement.parentElement);
+        assert(loadMoreElement.parentElement);
+        loadMoreElement.parentElement.removeChild(loadMoreElement);
       }
     },
   });
@@ -250,15 +284,30 @@ window.addEventListener("DOMContentLoaded", async () => {
     adjustHTMLTextareaElementHeight(sendFormMessageElement);
   });
 
-  loadMoreElement.addEventListener("click", async (e) => {
-    e.preventDefault();
-    await chat.loadOlder();
-  });
-
   adjustHTMLTextareaElementHeight(sendFormMessageElement);
 
   await chat.loadOlder();
   scroll.needScroll(() => chatListElement.firstElementChild);
   scroll.scrollIfNeeded();
+
+  setTimeout(() => {
+    observeLoadMore({
+      root: mainElement,
+      target: loadMoreElement,
+      loadCallback: async () => {
+        await chat.loadOlder();
+      },
+      preLoadCallback: async () => {
+        assert(loadMoreElement.firstElementChild);
+        loadMoreElement.firstElementChild.classList.remove("invisible");
+        await sleep(1 * 1000);
+      },
+      postLoadCallback: async () => {
+        assert(loadMoreElement.firstElementChild);
+        loadMoreElement.firstElementChild.classList.add("invisible");
+      },
+    });
+  }, 1 * 1000);
+
   setInterval(async () => await chat.loadNewer(), query.interval);
 });

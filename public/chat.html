@@ -36,7 +36,9 @@
     <main class="order-2 h-100 overflow-y-auto position-relative">
       <div class="d-flex flex-column-reverse mw-md mx-auto px-2 pt-2">
         <ul id="chat-list" class="d-flex flex-column-reverse m-0 p-0"></ul>
-        <p class="mb-2 text-center"><a id="load-more" href="#">Load more</a></p>
+        <div id="load-more" class="mb-2 text-center">
+          <div class="spinner-border text-muted invisible" role="status"><span class="visually-hidden">Loading...</span></div>
+        </div>
       </div>
     </main>
     <footer class="d-none">
