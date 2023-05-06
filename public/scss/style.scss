@@ -1,3 +1,9 @@
+$bg: #fff;
+$fg: #000;
+$btn-bg: #000;
+$btn-fg: #fff;
+$bdr: #ccc;
+
 body {
   text-align: center;
 }
@@ -5,20 +11,20 @@ body {
 input[type="submit"],
 input[type="text"],
 textarea {
-  background: #fff;
+  background: $bg;
   border-radius: 0.5em;
-  border: 1px solid #ccc;
+  border: 1px solid $bdr;
   box-sizing: border-box;
-  color: #000;
+  color: $fg;
   margin: 0.5em 0;
   padding: 0.5em;
   width: 100%;
 }
 
 input[type="submit"] {
-  background: #000;
+  background: $btn-bg;
   border: none;
-  color: #fff;
+  color: $btn-fg;
   font-weight: bold;
   padding: 0.75em;
 }
@@ -27,7 +33,7 @@ input[type="submit"] {
 .login-form,
 .send-form {
   border-radius: 0.5em;
-  border: 1px solid #ccc;
+  border: 1px solid $bdr;
   margin: 1em auto;
   padding: 1em;
   text-align: left;
@@ -56,7 +62,7 @@ input[type="submit"] {
 }
 
 .chat-list li .created_at {
-  color: #666;
+  color: lighten($fg, 50%);
   display: inline;
 }
 
