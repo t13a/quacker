@@ -78,6 +78,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const sendFormElement = document.querySelector(".send-form");
   const sendFormMessageElement = document.querySelector(".send-form *[name=message]");
   const chatListElement = document.querySelector(".chat-list");
+  const loadMoreElement = document.querySelector(".chat-list + p a");
 
   const query = (() => {
     const params = new URL(window.location.href).searchParams;
@@ -97,6 +98,9 @@ window.addEventListener("DOMContentLoaded", async () => {
       for (let i = 0; i < olderChat.length; i++) {
         chatListElement.appendChild(createChatEntityElement(olderChat[i]));
       }
+      if (olderChat.length == 0 || olderChat[olderChat.length - 1].id == 1) {
+        loadMoreElement.parentElement.parentElement.removeChild(loadMoreElement.parentElement);
+      }
     },
   });
 
@@ -106,6 +110,11 @@ window.addEventListener("DOMContentLoaded", async () => {
     sendFormElement.reset();
     sendFormMessageElement.focus();
     await chat.loadNewer();
+  });
+
+  loadMoreElement.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await chat.loadOlder();
   });
 
   await chat.loadOlder();
