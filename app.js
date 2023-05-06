@@ -39,10 +39,10 @@ function logout(req) {
   req.session = null;
 }
 
-async function doGetChat(nickname) {
-  console.log(`doGetChat: ${nickname}`);
+async function doGetChat(nickname, options = { limit: 10 }) {
+  console.log(`doGetChat: ${nickname}: ${JSON.stringify(options)}`);
   return new Promise((resolve, reject) => {
-    db.all("SELECT * FROM chat ORDER BY id DESC LIMIT 10", (err, rows) => {
+    db.all("SELECT * FROM chat ORDER BY id DESC LIMIT ?", options.limit, (err, rows) => {
       if (err) {
         reject(err);
       } else {
@@ -93,7 +93,9 @@ app.get("/logout", (req, res) => {
 
 app.get("/chat", async (req, res) => {
   if (isLoggedIn(req)) {
-    const chat = await doGetChat(req.session.nickname);
+    const chat = await doGetChat(req.session.nickname, {
+      limit: !isNaN(parseInt(req.query.limit)) ? parseInt(req.query.limit) : 10,
+    });
     res.render("chat", { session: req.session, chat: chat });
   } else {
     res.redirect("/login");
