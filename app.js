@@ -19,9 +19,6 @@ const db = new sqlite3.Database("db.sqlite3", (err) => {
 const app = express();
 const port = 3000;
 
-app.set("views", "./views");
-app.set("view engine", "ejs");
-
 app.use(cookieSession({ secret: "secret" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -80,11 +77,11 @@ app.get("/", (req, res) => {
   }
 });
 
-app.get("/login", (req, res) => {
+app.get("/login", (req, res, next) => {
   if (isLoggedIn(req)) {
     res.redirect("/chat");
   } else {
-    res.render("login");
+    next();
   }
 });
 
@@ -107,7 +104,7 @@ app.get("/session", async (req, res) => {
   }
 });
 
-app.get("/chat", async (req, res) => {
+app.get("/chat", async (req, res, next) => {
   if (req.accepts(["json", "html"]) === "json") {
     if (isLoggedIn(req)) {
       const chat = await doGetChat(req.session.nickname, {
@@ -121,7 +118,7 @@ app.get("/chat", async (req, res) => {
     }
   } else {
     if (isLoggedIn(req)) {
-      res.render("chat");
+      next();
     } else {
       res.redirect("/login");
     }
@@ -137,7 +134,7 @@ app.post("/chat", async (req, res) => {
   }
 });
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public"), { extensions: ["html"] }));
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
