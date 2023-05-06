@@ -12,4 +12,5 @@ module.exports = {
     path: path.join(__dirname, "public/js"),
     publicPath: "/js/",
   },
+  plugins: [new webpack.HotModuleReplacementPlugin()],
 };

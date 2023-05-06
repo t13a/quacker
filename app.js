@@ -2,6 +2,8 @@ const cookieSession = require("cookie-session");
 const express = require("express");
 const path = require("path");
 const sqlite3 = require("sqlite3").verbose();
+const webpack = require("webpack");
+const webpackDevMiddleware = require("webpack-dev-middleware");
 
 const db = new sqlite3.Database("db.sqlite3", (err) => {
   if (err) {
@@ -134,6 +136,7 @@ app.post("/chat", async (req, res) => {
   }
 });
 
+app.use(webpackDevMiddleware(webpack(require("./webpack.config.js"))));
 app.use(express.static(path.join(__dirname, "public"), { extensions: ["html"] }));
 
 app.listen(port, () => {
