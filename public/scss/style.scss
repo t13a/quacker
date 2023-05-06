@@ -15,6 +15,16 @@ $bdr: #ccc;
   border: 1px solid $bdr;
 }
 
+@mixin card($width) {
+  @extend %content-block;
+  @extend %rounded-border;
+  @if $width == narrow {
+    max-width: 20em;
+  } @else {
+    max-width: 40em;
+  }
+}
+
 body {
   text-align: center;
 }
@@ -47,10 +57,8 @@ input[type="submit"] {
 }
 
 .chat-list li {
-  @extend %content-block;
-  @extend %rounded-border;
+  @include card(default);
   display: block;
-  max-width: 40em;
 }
 
 .chat-list li .created_by {
@@ -80,9 +88,7 @@ input[type="submit"] {
 }
 
 .login-form {
-  @extend %content-block;
-  @extend %rounded-border;
-  max-width: 20em;
+  @include card(narrow);
 }
 
 .nickname {
@@ -90,7 +96,5 @@ input[type="submit"] {
 }
 
 .send-form {
-  @extend %content-block;
-  @extend %rounded-border;
-  max-width: 40em;
+  @include card(default);
 }
