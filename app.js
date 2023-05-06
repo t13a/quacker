@@ -12,7 +12,8 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/chat", (req, res) => {
-  res.render("chat");
+  const randomNickname = Math.random().toString(32).substring(2);
+  res.render("chat", { session: { nickname: randomNickname } });
 });
 
 app.use(express.static(path.join(__dirname, "public")));
