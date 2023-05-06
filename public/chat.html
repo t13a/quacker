@@ -33,11 +33,20 @@
         <button class="btn btn-primary"><i class="bi bi-send"></i></button>
       </form>
     </div>
-    <main class="order-2 h-100 overflow-y-auto position-relative">
-      <div class="d-flex flex-column-reverse mw-md mx-auto px-2 pt-2">
-        <ul id="chat-list" class="d-flex flex-column-reverse m-0 p-0"></ul>
-        <div id="load-more" class="mb-2 text-center">
-          <div class="spinner-border text-muted invisible" role="status"><span class="visually-hidden">Loading...</span></div>
+    <main class="order-2 h-100 overflow-hidden position-relative">
+      <div id="main-body" class="h-100 overflow-y-auto">
+        <div class="d-flex flex-column-reverse mw-md mx-auto px-2 pt-2">
+          <ul id="chat-list" class="d-flex flex-column-reverse m-0 p-0"></ul>
+          <div id="load-more" class="mb-2 text-center">
+            <div class="spinner-border text-muted invisible" role="status"><span class="visually-hidden">Loading...</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="position-absolute bottom-0 start-50 translate-middle-x p-3" style="z-index: 5">
+        <div id="new-message" class="toast hide border-0 bg-info" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+          <a href="#" class="toast-body d-block text-center text-white text-decoration-none"
+            ><i class="me-1 bi bi-arrow-down"></i> <span id="new-message-body"></span
+          ></a>
         </div>
       </div>
     </main>

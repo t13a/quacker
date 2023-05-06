@@ -1,5 +1,5 @@
 import avatar from "animal-avatar-generator";
-import "bootstrap";
+import { Toast } from "bootstrap";
 import "@fontsource/bad-script";
 import "../scss/style.scss";
 
@@ -93,6 +93,56 @@ const createChatManager = (options: {
         allChat.push(...olderChat);
         options.loadOlderCallback(olderChat);
       });
+    },
+  };
+};
+
+const createNewMessageManager = (options: { root: Element; toast: Element; updateCountCallback: (count: number) => void }) => {
+  let count = 0;
+  let current: Element | null;
+  let observer: IntersectionObserver;
+
+  const toast = new Toast(options.toast);
+
+  const dismiss = () => {
+    if (current) {
+      observer.unobserve(current);
+      current = null;
+    }
+    count = 0;
+    toast.hide();
+  };
+
+  const notify = (target: Element) => {
+    count++;
+    options.updateCountCallback(count);
+    if (!current) {
+      current = target;
+      observer.observe(target);
+      toast.show();
+    }
+  };
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          dismiss();
+        }
+      });
+    },
+    { root: options.root, threshold: 0.5 }
+  );
+
+  return {
+    current() {
+      return current;
+    },
+    dismiss() {
+      dismiss();
+    },
+    notify(target: Element) {
+      notify(target);
     },
   };
 };
@@ -215,20 +265,24 @@ window.addEventListener("DOMContentLoaded", async () => {
   const titleElement = document.querySelector<HTMLTitleElement>("title");
   const navbarTogglerElement = document.querySelector<HTMLButtonElement>(".navbar-toggler");
   const nicknameElement = document.querySelector<HTMLSpanElement>("#nickname");
-  const mainElement = document.querySelector<HTMLElement>("main");
+  const mainBodyElement = document.querySelector<HTMLElement>("#main-body");
   const sendFormElement = document.querySelector<HTMLFormElement>("#send-form");
   const sendFormMessageElement = document.querySelector<HTMLTextAreaElement>("#send-form *[name=message]");
   const chatListElement = document.querySelector<HTMLUListElement>("#chat-list");
   const loadMoreElement = document.querySelector<HTMLDivElement>("#load-more");
+  const newMessageElement = document.querySelector<HTMLDivElement>("#new-message");
+  const newMessageBodyElement = document.querySelector<HTMLSpanElement>("#new-message-body");
 
   assert(titleElement);
   assert(navbarTogglerElement);
   assert(nicknameElement);
-  assert(mainElement);
+  assert(mainBodyElement);
   assert(sendFormElement);
   assert(sendFormMessageElement);
   assert(chatListElement);
   assert(loadMoreElement);
+  assert(newMessageElement);
+  assert(newMessageBodyElement);
 
   const query = (() => {
     const params = new URL(window.location.href).searchParams;
@@ -243,17 +297,29 @@ window.addEventListener("DOMContentLoaded", async () => {
   navbarTogglerElement.insertAdjacentHTML("afterbegin", avatar(session.nickname, { blackout: false }));
   nicknameElement.innerText = session.nickname;
 
+  const newMessage = createNewMessageManager({
+    root: mainBodyElement,
+    toast: newMessageElement,
+    updateCountCallback(count) {
+      newMessageBodyElement.innerText = count > 1 ? `You have ${count} new messages.` : "You have a new message.";
+    },
+  });
+
   const scroll = createScrollManager();
 
   const chat = createChatManager({
     limit: query.limit,
     loadNewerCallback: (newerChat) => {
       const scrollMargin = 16;
-      if (mainElement.scrollTop + scrollMargin >= mainElement.scrollHeight - mainElement.clientHeight) {
+      if (mainBodyElement.scrollTop + scrollMargin >= mainBodyElement.scrollHeight - mainBodyElement.clientHeight) {
         scroll.needScroll(() => chatListElement.firstElementChild);
       }
       for (let i = newerChat.length - 1; i >= 0; i--) {
-        chatListElement.insertBefore(createChatEntityElement(newerChat[i]), chatListElement.firstChild);
+        const e = createChatEntityElement(newerChat[i]);
+        chatListElement.insertBefore(e, chatListElement.firstElementChild);
+        if (newerChat[i].created_by !== session.nickname) {
+          newMessage.notify(e);
+        }
       }
       scroll.scrollIfNeeded();
     },
@@ -284,6 +350,12 @@ window.addEventListener("DOMContentLoaded", async () => {
     adjustHTMLTextareaElementHeight(sendFormMessageElement);
   });
 
+  newMessageElement.addEventListener("click", async (e) => {
+    e.preventDefault();
+    scroll.needScroll(() => newMessage.current());
+    scroll.scrollIfNeeded();
+  });
+
   adjustHTMLTextareaElementHeight(sendFormMessageElement);
 
   await chat.loadOlder();
@@ -292,7 +364,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   setTimeout(() => {
     observeLoadMore({
-      root: mainElement,
+      root: mainBodyElement,
       target: loadMoreElement,
       loadCallback: async () => {
         await chat.loadOlder();
