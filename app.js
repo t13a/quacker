@@ -98,6 +98,15 @@ app.get("/logout", (req, res) => {
   res.redirect("/");
 });
 
+app.get("/session", async (req, res) => {
+  if (isLoggedIn(req)) {
+    console.log(`session: ${req.session.nickname}: ${JSON.stringify(req.session)}`);
+    res.json(req.session);
+  } else {
+    res.status(401).json("Unauthorized");
+  }
+});
+
 app.get("/chat", async (req, res) => {
   if (req.accepts(["json", "html"]) === "json") {
     if (isLoggedIn(req)) {
@@ -112,7 +121,7 @@ app.get("/chat", async (req, res) => {
     }
   } else {
     if (isLoggedIn(req)) {
-      res.render("chat", { session: req.session });
+      res.render("chat");
     } else {
       res.redirect("/login");
     }

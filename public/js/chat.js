@@ -43,6 +43,18 @@ const createChatManager = (options) => {
   };
 };
 
+async function doGetSession() {
+  return (
+    await fetch("/session", {
+      method: "GET",
+      cache: "no-store",
+      headers: {
+        Accept: "application/json",
+      },
+    })
+  ).json();
+}
+
 async function doGetChat(options = { from: 0, to: -1, limit: 10 }) {
   return (
     await fetch(`/chat?from=${options.from}&to=${options.to}&limit=${options.limit}`, {
@@ -94,6 +106,8 @@ const withLock = (() => {
 })();
 
 window.addEventListener("DOMContentLoaded", async () => {
+  const titleElement = document.querySelector("title");
+  const nicknameElement = document.querySelector(".nickname");
   const sendFormElement = document.querySelector(".send-form");
   const sendFormMessageElement = document.querySelector(".send-form *[name=message]");
   const chatListElement = document.querySelector(".chat-list");
@@ -106,6 +120,10 @@ window.addEventListener("DOMContentLoaded", async () => {
       limit: parseInt(params.get("limit")) || 10,
     };
   })();
+
+  const session = await doGetSession();
+  titleElement.innerText = `${session.nickname} - Quacker`;
+  nicknameElement.innerText = session.nickname;
 
   const chat = createChatManager({
     limit: query.limit,
