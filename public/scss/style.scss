@@ -54,32 +54,32 @@ input[type="submit"] {
   margin: 0;
   padding: 0;
   text-align: left;
-}
 
-.chat-list li {
-  @include card(default);
-  display: block;
-}
+  li {
+    @include card(default);
+    display: block;
 
-.chat-list li .created_by {
-  display: inline;
-  font-weight: bold;
-}
+    .created_by {
+      display: inline;
+      font-weight: bold;
+    }
 
-.chat-list li .created_at::before {
-  content: "\00b7";
-  margin: 0 0.25em;
-}
+    .created_at::before {
+      content: "\00b7";
+      margin: 0 0.25em;
+    }
 
-.chat-list li .created_at {
-  color: lighten($fg, 50%);
-  display: inline;
-}
+    .created_at {
+      color: lighten($fg, 50%);
+      display: inline;
+    }
 
-.chat-list li .message {
-  margin: 0;
-  overflow: scroll;
-  white-space: pre-wrap;
+    .message {
+      margin: 0;
+      overflow: scroll;
+      white-space: pre-wrap;
+    }
+  }
 }
 
 .duck {
