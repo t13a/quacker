@@ -32,22 +32,28 @@ function assert(value: any): asserts value {
   }
 }
 
-function createChatEntityElement(entity: ChatEntity) {
+function createChatEntityElement(entity: ChatEntity, session: Session) {
   const e = document.createElement("li");
   e.classList.add("d-flex", "position-relative", "mb-2");
 
-  const avatarElement = document.createElement("div");
-  avatarElement.classList.add("avatar", "position-absolute");
-  avatarElement.insertAdjacentHTML("afterbegin", avatar(entity.created_by, { blackout: false }));
-  assert(avatarElement.firstElementChild);
-  avatarElement.firstElementChild.removeAttribute("width");
-  avatarElement.firstElementChild.removeAttribute("height");
-  e.appendChild(avatarElement);
-
   const bubbleElement = document.createElement("div");
-  bubbleElement.classList.add("overflow-hidden", "px-3", "py-2", "border", "rounded", "shadow-sm", "bg-white");
-  bubbleElement.style.marginLeft = "3.5rem";
+  bubbleElement.classList.add("overflow-hidden", "px-3", "py-2", "border", "rounded", "shadow-sm");
   e.appendChild(bubbleElement);
+
+  if (entity.created_by == session.nickname) {
+    bubbleElement.classList.add("ms-auto", "bg-primary", "text-white");
+  } else {
+    bubbleElement.classList.add("bg-white");
+    bubbleElement.style.marginLeft = "3.5rem";
+
+    const avatarElement = document.createElement("div");
+    avatarElement.classList.add("avatar", "position-absolute");
+    avatarElement.insertAdjacentHTML("afterbegin", avatar(entity.created_by, { blackout: false }));
+    assert(avatarElement.firstElementChild);
+    avatarElement.firstElementChild.removeAttribute("width");
+    avatarElement.firstElementChild.removeAttribute("height");
+    e.insertBefore(avatarElement, bubbleElement);
+  }
 
   const headerElement = document.createElement("div");
   headerElement.classList.add("d-flex", "mx-0", "my-1", "p-0");
@@ -59,7 +65,7 @@ function createChatEntityElement(entity: ChatEntity) {
   headerElement.appendChild(createdByElement);
 
   const createdAtElement = document.createElement("span");
-  createdAtElement.classList.add("ms-2", "text-nowrap", "text-secondary");
+  createdAtElement.classList.add("ms-2", "text-nowrap", entity.created_by == session.nickname ? "text-white-50" : "text-secondary");
   createdAtElement.innerText = formatCreatedAt(entity.created_at);
   headerElement.appendChild(createdAtElement);
 
@@ -315,7 +321,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         scroll.needScroll(() => chatListElement.firstElementChild);
       }
       for (let i = newerChat.length - 1; i >= 0; i--) {
-        const e = createChatEntityElement(newerChat[i]);
+        const e = createChatEntityElement(newerChat[i], session);
         chatListElement.insertBefore(e, chatListElement.firstElementChild);
         if (newerChat[i].created_by !== session.nickname) {
           newMessage.notify(e);
@@ -325,7 +331,7 @@ window.addEventListener("DOMContentLoaded", async () => {
     },
     loadOlderCallback: (olderChat) => {
       for (let i = 0; i < olderChat.length; i++) {
-        chatListElement.appendChild(createChatEntityElement(olderChat[i]));
+        chatListElement.appendChild(createChatEntityElement(olderChat[i], session));
       }
       if (olderChat.length == 0 || olderChat[olderChat.length - 1].id == 1) {
         assert(loadMoreElement.parentElement);
