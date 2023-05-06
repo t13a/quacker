@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="./css/style.css" />
+    <script src="js/chat.js"></script>
     <title><%= session.nickname %> - Quacker</title>
   </head>
   <body>
@@ -13,7 +14,7 @@
     <main>
       <h2>What are you doing now?<span class="duck">&#x1f986;</span></h2>
       <p>You are logged in as <span class="nickname"><%= session.nickname %></span>. To change your nickname, please <a href="/logout">logout</a>.</p>
-      <form class="send-form" action="/chat" method="POST">
+      <form class="send-form">
         <div>
           <label for="message">Message</label>
         </div>

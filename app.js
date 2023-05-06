@@ -23,6 +23,7 @@ app.set("views", "./views");
 app.set("view engine", "ejs");
 
 app.use(cookieSession({ secret: "secret" }));
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 function isLoggedIn(req) {
@@ -114,9 +115,9 @@ app.get("/chat", async (req, res) => {
 app.post("/chat", async (req, res) => {
   if (isLoggedIn(req)) {
     await doPostChat(req.session.nickname, req.body.message);
-    res.redirect("/chat");
+    res.status(201).json("Created");
   } else {
-    res.status(401).send("Unauthorized");
+    res.status(401).json("Unauthorized");
   }
 });
 
