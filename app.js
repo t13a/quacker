@@ -1,3 +1,4 @@
+const cookieSession = require("cookie-session");
 const express = require("express");
 const path = require("path");
 
@@ -6,6 +7,14 @@ const port = 3000;
 
 app.set("views", "./views");
 app.set("view engine", "ejs");
+
+app.use(cookieSession({ secret: "secret" }));
+app.use(express.urlencoded({ extended: true }));
+
+function login(req) {
+  console.log(`login: ${JSON.stringify(req.body.nickname)}`);
+  req.session.nickname = req.body.nickname;
+}
 
 app.get("/", (req, res) => {
   res.redirect("/login");
@@ -16,6 +25,7 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
+  login(req);
   res.redirect("/chat");
 });
 
@@ -24,8 +34,7 @@ app.get("/logout", (req, res) => {
 });
 
 app.get("/chat", (req, res) => {
-  const randomNickname = Math.random().toString(32).substring(2);
-  res.render("chat", { session: { nickname: randomNickname } });
+  res.render("chat", { session: req.session });
 });
 
 app.post("/chat", (req, res) => {
