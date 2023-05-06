@@ -11,6 +11,10 @@ app.set("view engine", "ejs");
 app.use(cookieSession({ secret: "secret" }));
 app.use(express.urlencoded({ extended: true }));
 
+function isLoggedIn(req) {
+  return typeof req.session.nickname === "string";
+}
+
 function login(req) {
   console.log(`login: ${JSON.stringify(req.body.nickname)}`);
   req.session.nickname = req.body.nickname;
@@ -22,11 +26,19 @@ function logout(req) {
 }
 
 app.get("/", (req, res) => {
-  res.redirect("/login");
+  if (isLoggedIn(req)) {
+    res.redirect("/chat");
+  } else {
+    res.redirect("/login");
+  }
 });
 
 app.get("/login", (req, res) => {
-  res.render("login");
+  if (isLoggedIn(req)) {
+    res.redirect("/chat");
+  } else {
+    res.render("login");
+  }
 });
 
 app.post("/login", (req, res) => {
@@ -40,11 +52,19 @@ app.get("/logout", (req, res) => {
 });
 
 app.get("/chat", (req, res) => {
-  res.render("chat", { session: req.session });
+  if (isLoggedIn(req)) {
+    res.render("chat", { session: req.session });
+  } else {
+    res.redirect("/login");
+  }
 });
 
 app.post("/chat", (req, res) => {
-  res.redirect("/chat");
+  if (isLoggedIn(req)) {
+    res.redirect("/chat");
+  } else {
+    res.status(401).send("Unauthorized");
+  }
 });
 
 app.use(express.static(path.join(__dirname, "public")));
