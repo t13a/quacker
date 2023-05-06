@@ -21,6 +21,24 @@ function createChatEntityElement(entity) {
   return e;
 }
 
+const createChatManager = (options) => {
+  const allChat = [];
+  return {
+    async loadNewer() {
+      const newest = allChat.length > 0 ? allChat[0].id : 0;
+      const newerChat = await doGetChat({ from: newest + 1, to: newest + options.limit, limit: options.limit });
+      allChat.unshift(...newerChat);
+      options.loadNewerCallback(newerChat);
+    },
+    async loadOlder() {
+      const oldest = allChat.length > 0 ? allChat[allChat.length - 1].id : 0;
+      const olderChat = await doGetChat({ from: 0, to: oldest - 1, limit: options.limit });
+      allChat.push(...olderChat);
+      options.loadOlderCallback(olderChat);
+    },
+  };
+};
+
 async function doGetChat(options = { from: 0, to: -1, limit: 10 }) {
   return (
     await fetch(`/chat?from=${options.from}&to=${options.to}&limit=${options.limit}`, {
@@ -61,22 +79,34 @@ window.addEventListener("DOMContentLoaded", async () => {
   const sendFormMessageElement = document.querySelector(".send-form *[name=message]");
   const chatListElement = document.querySelector(".chat-list");
 
+  const query = (() => {
+    const params = new URL(window.location.href).searchParams;
+    return {
+      limit: parseInt(params.get("limit")) || 10,
+    };
+  })();
+
+  const chat = createChatManager({
+    limit: query.limit,
+    loadNewerCallback: (newerChat) => {
+      for (let i = newerChat.length - 1; i >= 0; i--) {
+        chatListElement.insertBefore(createChatEntityElement(newerChat[i]), chatListElement.firstChild);
+      }
+    },
+    loadOlderCallback: (olderChat) => {
+      for (let i = 0; i < olderChat.length; i++) {
+        chatListElement.appendChild(createChatEntityElement(olderChat[i]));
+      }
+    },
+  });
+
   sendFormElement.addEventListener("submit", async (e) => {
     e.preventDefault();
     await doPostChat(sendFormMessageElement.value);
     sendFormElement.reset();
     sendFormMessageElement.focus();
-    while (chatListElement.firstElementChild) {
-      chatListElement.removeChild(chatListElement.firstElementChild);
-    }
-    const chat = await doGetChat();
-    for (let i = 0; i < chat.length; i++) {
-      chatListElement.appendChild(createChatEntityElement(chat[i]));
-    }
+    await chat.loadNewer();
   });
 
-  const chat = await doGetChat();
-  for (let i = 0; i < chat.length; i++) {
-    chatListElement.appendChild(createChatEntityElement(chat[i]));
-  }
+  await chat.loadOlder();
 });
