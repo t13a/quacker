@@ -1,3 +1,4 @@
+import avatar from "animal-avatar-generator";
 import "@fontsource/bad-script";
 import "../scss/style.scss";
 
@@ -20,6 +21,14 @@ function assert(value: any): asserts value {
 
 function createChatEntityElement(entity: ChatEntity) {
   const e = document.createElement("li");
+
+  const avatarElement = document.createElement("div");
+  avatarElement.className = "avatar";
+  avatarElement.insertAdjacentHTML("afterbegin", avatar(entity.created_by, { blackout: false }));
+  assert(avatarElement.firstElementChild);
+  avatarElement.firstElementChild.removeAttribute("width");
+  avatarElement.firstElementChild.removeAttribute("height");
+  e.appendChild(avatarElement);
 
   const createdByElement = document.createElement("div");
   createdByElement.className = "created_by";
