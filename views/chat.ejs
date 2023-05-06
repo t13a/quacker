@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="./css/style.css" />
-    <title>NICKNAME - Quacker</title>
+    <title><%= session.nickname %> - Quacker</title>
   </head>
   <body>
     <header>
@@ -12,8 +12,8 @@
     </header>
     <main>
       <h2>What are you doing now?<span class="duck">&#x1f986;</span></h2>
-      <p>You are logged in as <span class="nickname">NICKNAME</span>. To change your nickname, please <a href="login.html">logout</a>.</p>
-      <form class="send-form" action="chat.html" method="GET">
+      <p>You are logged in as <span class="nickname"><%= session.nickname %></span>. To change your nickname, please <a href="/logout">logout</a>.</p>
+      <form class="send-form" action="/chat" method="POST">
         <div>
           <label for="message">Message</label>
         </div>
