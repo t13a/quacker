@@ -19,10 +19,8 @@ const db = new sqlite3.Database("db.sqlite3", (err) => {
 const app = express();
 const port = 3000;
 
-app.set("views", "./views");
-app.set("view engine", "ejs");
-
 app.use(cookieSession({ secret: "secret" }));
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 function isLoggedIn(req) {
@@ -79,11 +77,11 @@ app.get("/", (req, res) => {
   }
 });
 
-app.get("/login", (req, res) => {
+app.get("/login", (req, res, next) => {
   if (isLoggedIn(req)) {
     res.redirect("/chat");
   } else {
-    res.render("login");
+    next();
   }
 });
 
@@ -97,30 +95,46 @@ app.get("/logout", (req, res) => {
   res.redirect("/");
 });
 
-app.get("/chat", async (req, res) => {
+app.get("/session", async (req, res) => {
   if (isLoggedIn(req)) {
-    const query = {
-      from: !isNaN(parseInt(req.query.from)) ? parseInt(req.query.from) : 1,
-      to: !isNaN(parseInt(req.query.to)) ? parseInt(req.query.to) : -1,
-      limit: !isNaN(parseInt(req.query.limit)) ? parseInt(req.query.limit) : 10,
-    };
-    const chat = await doGetChat(req.session.nickname, query);
-    res.render("chat", { session: req.session, query: query, chat: chat });
+    console.log(`session: ${req.session.nickname}: ${JSON.stringify(req.session)}`);
+    res.json(req.session);
   } else {
-    res.redirect("/login");
+    res.status(401).json("Unauthorized");
+  }
+});
+
+app.get("/chat", async (req, res, next) => {
+  if (req.accepts(["json", "html"]) === "json") {
+    if (isLoggedIn(req)) {
+      const chat = await doGetChat(req.session.nickname, {
+        from: !isNaN(parseInt(req.query.from)) ? parseInt(req.query.from) : 0,
+        to: !isNaN(parseInt(req.query.to)) ? parseInt(req.query.to) : -1,
+        limit: !isNaN(parseInt(req.query.limit)) ? parseInt(req.query.limit) : 10,
+      });
+      res.json(chat);
+    } else {
+      res.status(401).json("Unauthorized");
+    }
+  } else {
+    if (isLoggedIn(req)) {
+      next();
+    } else {
+      res.redirect("/login");
+    }
   }
 });
 
 app.post("/chat", async (req, res) => {
   if (isLoggedIn(req)) {
     await doPostChat(req.session.nickname, req.body.message);
-    res.redirect("/chat");
+    res.status(201).json("Created");
   } else {
-    res.status(401).send("Unauthorized");
+    res.status(401).json("Unauthorized");
   }
 });
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public"), { extensions: ["html"] }));
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
