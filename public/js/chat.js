@@ -1,4 +1,4 @@
-"use strict";
+import "../css/style.css";
 
 function createChatEntityElement(entity) {
   const e = document.createElement("li");

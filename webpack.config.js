@@ -6,11 +6,20 @@ module.exports = {
   mode: "development",
   entry: {
     chat: "./public/js/chat.js",
+    login: "./public/js/login.js",
   },
   output: {
     filename: "[name].bundle.js",
     path: path.join(__dirname, "public/js"),
     publicPath: "/js/",
+  },
+  module: {
+    rules: [
+      {
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader"],
+      },
+    ],
   },
   plugins: [new webpack.HotModuleReplacementPlugin()],
 };
