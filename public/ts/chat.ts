@@ -1,4 +1,5 @@
 import avatar from "animal-avatar-generator";
+import "bootstrap";
 import "@fontsource/bad-script";
 import "../scss/style.scss";
 
@@ -148,6 +149,7 @@ const withLock = (() => {
 
 window.addEventListener("DOMContentLoaded", async () => {
   const titleElement = document.querySelector<HTMLTitleElement>("title");
+  const navbarTogglerElement = document.querySelector<HTMLButtonElement>(".navbar-toggler");
   const nicknameElement = document.querySelector<HTMLSpanElement>("#nickname");
   const sendFormElement = document.querySelector<HTMLFormElement>("#send-form");
   const sendFormMessageElement = document.querySelector<HTMLTextAreaElement>("#send-form *[name=message]");
@@ -155,6 +157,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const loadMoreElement = document.querySelector<HTMLAnchorElement>("#load-more");
 
   assert(titleElement);
+  assert(navbarTogglerElement);
   assert(nicknameElement);
   assert(sendFormElement);
   assert(sendFormMessageElement);
@@ -171,6 +174,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   const session = await doGetSession();
   titleElement.innerText = `${session.nickname} - Quacker`;
+  navbarTogglerElement.insertAdjacentHTML("afterbegin", avatar(session.nickname, { blackout: false }));
   nicknameElement.innerText = session.nickname;
 
   const chat = createChatManager({

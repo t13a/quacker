@@ -6,14 +6,29 @@
     <script src="js/chat.bundle.js"></script>
     <title>Quacker</title>
   </head>
-  <body class="w-100 h-100 px-2 bg-light text-center">
-    <header>
-      <h1 class="mt-5 mb-1 display-1 font-script">Quacker</h1>
-    </header>
+  <body class="w-100 h-100 bg-light text-center">
+    <nav class="order-1 navbar navbar-dark bg-primary text-white">
+      <div class="container-fluid">
+        <h1 class="h1 ms-1 mb-0 font-script">Quacker</h1>
+        <button
+          class="navbar-toggler avatar m-0 p-0 border-0 rounded-circle"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbar-content"
+          aria-controls="navbar-content"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        ></button>
+        <div class="collapse navbar-collapse" id="navbar-content">
+          <div class="card card-body mt-3 mb-2 bg-light text-dark">
+            <h6 class="card-title">You are logged in as <span id="nickname"></span>.</h6>
+            <p class="card-subtitle text-muted">To change your nickname, please <a href="/logout" class="link-primary h6">logout</a>.</p>
+          </div>
+        </div>
+      </div>
+    </nav>
     <main>
-      <h2 class="font-script">What are you doing now?<span class="ms-2 h1">&#x1f986;</span></h2>
-      <p>You are logged in as <span id="nickname"></span>. To change your nickname, please <a href="/logout">logout</a>.</p>
-      <div class="mw-md mx-auto mb-4 p-2 border rounded shadow-sm bg-white">
+      <div class="mb-4 p-2 border rounded shadow-sm bg-white">
         <form id="send-form" class="input-group">
           <textarea name="message" placeholder="Type a message" autofocus required maxlength="280" class="form-control resize-none"></textarea>
           <input type="submit" value="Send" class="btn btn-primary" />
