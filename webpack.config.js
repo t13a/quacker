@@ -5,8 +5,8 @@ module.exports = {
   devtool: "source-map",
   mode: "development",
   entry: {
-    chat: "./public/js/chat.js",
-    login: "./public/js/login.js",
+    chat: "./public/ts/chat.ts",
+    login: "./public/ts/login.ts",
   },
   output: {
     filename: "[name].bundle.js",

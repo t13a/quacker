@@ -1,6 +1,23 @@
 import "../scss/style.scss";
 
-function createChatEntityElement(entity) {
+interface ChatEntity {
+  id: number;
+  created_by: string;
+  created_at: number;
+  message: string;
+}
+
+interface Session {
+  nickname: string;
+}
+
+function assert(value: any): asserts value {
+  if (!value) {
+    throw new Error();
+  }
+}
+
+function createChatEntityElement(entity: ChatEntity) {
   const e = document.createElement("li");
 
   const createdByElement = document.createElement("div");
@@ -21,8 +38,12 @@ function createChatEntityElement(entity) {
   return e;
 }
 
-const createChatManager = (options) => {
-  const allChat = [];
+const createChatManager = (options: {
+  limit: number;
+  loadNewerCallback: (newerChat: ChatEntity[]) => void;
+  loadOlderCallback: (olderChat: ChatEntity[]) => void;
+}) => {
+  const allChat: ChatEntity[] = [];
   return {
     async loadNewer() {
       await withLock("loadNewer", async () => {
@@ -43,7 +64,7 @@ const createChatManager = (options) => {
   };
 };
 
-async function doGetSession() {
+async function doGetSession(): Promise<Session> {
   return (
     await fetch("/session", {
       method: "GET",
@@ -55,7 +76,7 @@ async function doGetSession() {
   ).json();
 }
 
-async function doGetChat(options = { from: 0, to: -1, limit: 10 }) {
+async function doGetChat(options = { from: 0, to: -1, limit: 10 }): Promise<ChatEntity[]> {
   return (
     await fetch(`/chat?from=${options.from}&to=${options.to}&limit=${options.limit}`, {
       method: "GET",
@@ -67,7 +88,7 @@ async function doGetChat(options = { from: 0, to: -1, limit: 10 }) {
   ).json();
 }
 
-async function doPostChat(message) {
+async function doPostChat(message: string): Promise<void> {
   await fetch("/chat", {
     method: "POST",
     cache: "no-store",
@@ -87,12 +108,12 @@ const formatCreatedAt = (() => {
     minute: "numeric",
     hour12: false,
   });
-  return (createdAt) => dtf.format(new Date(createdAt * 1000));
+  return (createdAt: number) => dtf.format(new Date(createdAt * 1000));
 })();
 
 const withLock = (() => {
-  const state = {};
-  return async (key, callback) => {
+  const state: { [key: string]: true } = {};
+  return async (key: string, callback: () => Promise<void>) => {
     if (state[key]) {
       return;
     }
@@ -106,18 +127,25 @@ const withLock = (() => {
 })();
 
 window.addEventListener("DOMContentLoaded", async () => {
-  const titleElement = document.querySelector("title");
-  const nicknameElement = document.querySelector(".nickname");
-  const sendFormElement = document.querySelector(".send-form");
-  const sendFormMessageElement = document.querySelector(".send-form *[name=message]");
-  const chatListElement = document.querySelector(".chat-list");
-  const loadMoreElement = document.querySelector(".chat-list + p a");
+  const titleElement = document.querySelector<HTMLTitleElement>("title");
+  const nicknameElement = document.querySelector<HTMLSpanElement>(".nickname");
+  const sendFormElement = document.querySelector<HTMLFormElement>(".send-form");
+  const sendFormMessageElement = document.querySelector<HTMLTextAreaElement>(".send-form *[name=message]");
+  const chatListElement = document.querySelector<HTMLUListElement>(".chat-list");
+  const loadMoreElement = document.querySelector<HTMLAnchorElement>(".chat-list + p a");
+
+  assert(titleElement);
+  assert(nicknameElement);
+  assert(sendFormElement);
+  assert(sendFormMessageElement);
+  assert(chatListElement);
+  assert(loadMoreElement);
 
   const query = (() => {
     const params = new URL(window.location.href).searchParams;
     return {
-      interval: parseInt(params.get("interval")) || 3 * 1000,
-      limit: parseInt(params.get("limit")) || 10,
+      interval: parseInt(params.get("interval") ?? "") || 3 * 1000,
+      limit: parseInt(params.get("limit") ?? "") || 10,
     };
   })();
 
@@ -137,6 +165,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         chatListElement.appendChild(createChatEntityElement(olderChat[i]));
       }
       if (olderChat.length == 0 || olderChat[olderChat.length - 1].id == 1) {
+        assert(loadMoreElement.parentElement?.parentElement);
         loadMoreElement.parentElement.parentElement.removeChild(loadMoreElement.parentElement);
       }
     },
