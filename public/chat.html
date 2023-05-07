@@ -6,28 +6,61 @@
     <script src="js/chat.bundle.js"></script>
     <title>Quacker</title>
   </head>
-  <body>
-    <header>
-      <h1>Quacker</h1>
-    </header>
-    <main>
-      <h2>What are you doing now?<span class="duck">&#x1f986;</span></h2>
-      <p>You are logged in as <span class="nickname"></span>. To change your nickname, please <a href="/logout">logout</a>.</p>
-      <form class="send-form">
-        <div>
-          <label for="message">Message</label>
+  <body class="w-100 h-100 position-fixed overflow-hidden d-flex flex-column bg-light">
+    <nav class="order-1 navbar navbar-dark shadow bg-primary text-white" style="z-index: 10">
+      <div class="container-fluid">
+        <h1 class="h1 ms-1 mb-0 font-script">Quacker</h1>
+        <button
+          tabindex="4"
+          class="navbar-toggler avatar m-0 p-0 border-0 rounded-circle"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbar-content"
+          aria-controls="navbar-content"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        ></button>
+        <div class="collapse navbar-collapse" id="navbar-content">
+          <div class="card card-body mt-3 mb-2 bg-light text-dark">
+            <h6 class="card-title">You are logged in as <span id="nickname"></span>.</h6>
+            <p class="card-subtitle text-muted">To change your nickname, please <a href="/logout" class="link-primary h6">logout</a>.</p>
+          </div>
         </div>
-        <div>
-          <textarea name="message" placeholder="Type a message" autofocus required maxlength="280"></textarea>
-        </div>
-        <div>
-          <input type="submit" value="Send" />
-        </div>
+      </div>
+    </nav>
+    <div class="order-3 p-2 border border-top">
+      <form id="send-form" class="input-group">
+        <textarea
+          name="message"
+          placeholder="Type a message"
+          rows="1"
+          autofocus
+          required
+          maxlength="280"
+          tabindex="2"
+          class="form-control resize-none"
+        ></textarea>
+        <button tabindex="3" class="btn btn-primary"><i class="bi bi-send"></i></button>
       </form>
-      <ul class="chat-list"></ul>
-      <p><a href="#">Load more</a></p>
+    </div>
+    <main class="order-2 h-100 overflow-hidden position-relative">
+      <div id="main-body" tabindex="1" class="h-100 overflow-y-auto outline-none-focus">
+        <div class="d-flex flex-column-reverse mw-md mx-auto px-2 pt-2">
+          <ul id="chat-list" class="d-flex flex-column-reverse m-0 p-0"></ul>
+          <div id="load-more" class="mb-2 text-center">
+            <div class="spinner-border text-muted invisible" role="status"><span class="visually-hidden">Loading...</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="position-absolute bottom-0 start-50 translate-middle-x p-3" style="z-index: 5">
+        <div id="new-message" class="toast hide border-0 bg-info" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
+          <a href="#" class="toast-body d-block text-center text-white text-decoration-none"
+            ><i class="me-1 bi bi-arrow-down"></i> <span id="new-message-body"></span
+          ></a>
+        </div>
+      </div>
     </main>
-    <footer>
+    <footer class="d-none">
       <address>&copy; 2023 <a href="https://github.com/t13a">Tatsuya Kitagawa</a></address>
     </footer>
   </body>

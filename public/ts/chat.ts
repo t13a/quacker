@@ -1,4 +1,5 @@
 import avatar from "animal-avatar-generator";
+import { Toast } from "bootstrap";
 import "@fontsource/bad-script";
 import "../scss/style.scss";
 
@@ -13,37 +14,65 @@ interface Session {
   nickname: string;
 }
 
+function adjustHTMLTextareaElementHeight(e: HTMLTextAreaElement) {
+  e.style.height = "0px";
+
+  const clientHeight = e.clientHeight;
+  const scrollHeight = e.scrollHeight;
+  const paddingBottom = parseInt(window.getComputedStyle(e).getPropertyValue("padding-bottom"));
+  const paddingTop = parseInt(window.getComputedStyle(e).getPropertyValue("padding-top"));
+  const maxHeight = (clientHeight - paddingBottom - paddingTop) * 5 + paddingBottom + paddingTop;
+
+  e.style.height = `${scrollHeight < maxHeight ? scrollHeight : maxHeight}px`;
+}
+
 function assert(value: any): asserts value {
   if (!value) {
     throw new Error();
   }
 }
 
-function createChatEntityElement(entity: ChatEntity) {
+function createChatEntityElement(entity: ChatEntity, session: Session) {
   const e = document.createElement("li");
+  e.classList.add("d-flex", "position-relative", "mb-2");
 
-  const avatarElement = document.createElement("div");
-  avatarElement.className = "avatar";
-  avatarElement.insertAdjacentHTML("afterbegin", avatar(entity.created_by, { blackout: false }));
-  assert(avatarElement.firstElementChild);
-  avatarElement.firstElementChild.removeAttribute("width");
-  avatarElement.firstElementChild.removeAttribute("height");
-  e.appendChild(avatarElement);
+  const bubbleElement = document.createElement("div");
+  bubbleElement.classList.add("overflow-hidden", "px-3", "py-2", "border", "rounded", "shadow-sm");
+  e.appendChild(bubbleElement);
 
-  const createdByElement = document.createElement("div");
-  createdByElement.className = "created_by";
+  if (entity.created_by == session.nickname) {
+    bubbleElement.classList.add("ms-auto", "bg-primary", "text-white");
+  } else {
+    bubbleElement.classList.add("bg-white");
+    bubbleElement.style.marginLeft = "3.5rem";
+
+    const avatarElement = document.createElement("div");
+    avatarElement.classList.add("avatar", "position-absolute");
+    avatarElement.insertAdjacentHTML("afterbegin", avatar(entity.created_by, { blackout: false }));
+    assert(avatarElement.firstElementChild);
+    avatarElement.firstElementChild.removeAttribute("width");
+    avatarElement.firstElementChild.removeAttribute("height");
+    e.insertBefore(avatarElement, bubbleElement);
+  }
+
+  const headerElement = document.createElement("div");
+  headerElement.classList.add("d-flex", "mx-0", "my-1", "p-0");
+  bubbleElement.appendChild(headerElement);
+
+  const createdByElement = document.createElement("strong");
+  createdByElement.classList.add("d-inline-block", "me-auto", "text-nowrap", "text-truncate");
   createdByElement.innerText = entity.created_by;
-  e.appendChild(createdByElement);
+  headerElement.appendChild(createdByElement);
 
-  const createdAtElement = document.createElement("div");
-  createdAtElement.className = "created_at";
+  const createdAtElement = document.createElement("span");
+  createdAtElement.classList.add("ms-2", "text-nowrap", entity.created_by == session.nickname ? "text-white-50" : "text-secondary");
   createdAtElement.innerText = formatCreatedAt(entity.created_at);
-  e.appendChild(createdAtElement);
+  headerElement.appendChild(createdAtElement);
 
   const messageElement = document.createElement("p");
-  messageElement.className = "message";
+  messageElement.classList.add("m-0", "pb-1", "overflow-x-auto", "white-space-pre-wrap");
   messageElement.innerText = entity.message;
-  e.appendChild(messageElement);
+  bubbleElement.appendChild(messageElement);
 
   return e;
 }
@@ -70,6 +99,74 @@ const createChatManager = (options: {
         allChat.push(...olderChat);
         options.loadOlderCallback(olderChat);
       });
+    },
+  };
+};
+
+const createNewMessageManager = (options: { root: Element; toast: Element; updateCountCallback: (count: number) => void }) => {
+  let count = 0;
+  let current: Element | null;
+  let observer: IntersectionObserver;
+
+  const toast = new Toast(options.toast);
+
+  const dismiss = () => {
+    if (current) {
+      observer.unobserve(current);
+      current = null;
+    }
+    count = 0;
+    toast.hide();
+  };
+
+  const notify = (target: Element) => {
+    count++;
+    options.updateCountCallback(count);
+    if (!current) {
+      current = target;
+      observer.observe(target);
+      toast.show();
+    }
+  };
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          dismiss();
+        }
+      });
+    },
+    { root: options.root, threshold: 0.5 }
+  );
+
+  return {
+    current() {
+      return current;
+    },
+    dismiss() {
+      dismiss();
+    },
+    notify(target: Element) {
+      notify(target);
+    },
+  };
+};
+
+const createScrollManager = () => {
+  let neededCallback: (() => Element | null) | null;
+  return {
+    scrollIfNeeded() {
+      if (neededCallback) {
+        const e = neededCallback();
+        if (e) {
+          e.scrollIntoView({ behavior: "smooth" });
+        }
+        neededCallback = null;
+      }
+    },
+    needScroll(callback: () => Element | null) {
+      neededCallback = callback;
     },
   };
 };
@@ -121,6 +218,40 @@ const formatCreatedAt = (() => {
   return (createdAt: number) => dtf.format(new Date(createdAt * 1000));
 })();
 
+const observeLoadMore = (options: {
+  root: Element;
+  target: Element;
+  loadCallback: () => Promise<void>;
+  preLoadCallback: () => Promise<void>;
+  postLoadCallback: () => Promise<void>;
+}) => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(async (entry) => {
+        if (entry.isIntersecting) {
+          await options.preLoadCallback();
+          const scrollTop = options.root.scrollTop;
+          const oldScrollHeight = options.root.scrollHeight;
+          await options.loadCallback();
+          const newScrollHeight = options.root.scrollHeight;
+          options.root.scrollTo(0, scrollTop + newScrollHeight - oldScrollHeight);
+          await options.postLoadCallback();
+        }
+      });
+    },
+    {
+      root: options.root,
+      threshold: 1.0,
+    }
+  );
+  observer.observe(options.target);
+  return observer;
+};
+
+async function sleep(ms: number) {
+  await new Promise<void>((resolve) => setTimeout(() => resolve(), ms));
+}
+
 const withLock = (() => {
   const state: { [key: string]: true } = {};
   return async (key: string, callback: () => Promise<void>) => {
@@ -138,18 +269,26 @@ const withLock = (() => {
 
 window.addEventListener("DOMContentLoaded", async () => {
   const titleElement = document.querySelector<HTMLTitleElement>("title");
-  const nicknameElement = document.querySelector<HTMLSpanElement>(".nickname");
-  const sendFormElement = document.querySelector<HTMLFormElement>(".send-form");
-  const sendFormMessageElement = document.querySelector<HTMLTextAreaElement>(".send-form *[name=message]");
-  const chatListElement = document.querySelector<HTMLUListElement>(".chat-list");
-  const loadMoreElement = document.querySelector<HTMLAnchorElement>(".chat-list + p a");
+  const navbarTogglerElement = document.querySelector<HTMLButtonElement>(".navbar-toggler");
+  const nicknameElement = document.querySelector<HTMLSpanElement>("#nickname");
+  const mainBodyElement = document.querySelector<HTMLElement>("#main-body");
+  const sendFormElement = document.querySelector<HTMLFormElement>("#send-form");
+  const sendFormMessageElement = document.querySelector<HTMLTextAreaElement>("#send-form *[name=message]");
+  const chatListElement = document.querySelector<HTMLUListElement>("#chat-list");
+  const loadMoreElement = document.querySelector<HTMLDivElement>("#load-more");
+  const newMessageElement = document.querySelector<HTMLDivElement>("#new-message");
+  const newMessageBodyElement = document.querySelector<HTMLSpanElement>("#new-message-body");
 
   assert(titleElement);
+  assert(navbarTogglerElement);
   assert(nicknameElement);
+  assert(mainBodyElement);
   assert(sendFormElement);
   assert(sendFormMessageElement);
   assert(chatListElement);
   assert(loadMoreElement);
+  assert(newMessageElement);
+  assert(newMessageBodyElement);
 
   const query = (() => {
     const params = new URL(window.location.href).searchParams;
@@ -161,22 +300,42 @@ window.addEventListener("DOMContentLoaded", async () => {
 
   const session = await doGetSession();
   titleElement.innerText = `${session.nickname} - Quacker`;
+  navbarTogglerElement.insertAdjacentHTML("afterbegin", avatar(session.nickname, { blackout: false }));
   nicknameElement.innerText = session.nickname;
+
+  const newMessage = createNewMessageManager({
+    root: mainBodyElement,
+    toast: newMessageElement,
+    updateCountCallback(count) {
+      newMessageBodyElement.innerText = count > 1 ? `You have ${count} new messages.` : "You have a new message.";
+    },
+  });
+
+  const scroll = createScrollManager();
 
   const chat = createChatManager({
     limit: query.limit,
     loadNewerCallback: (newerChat) => {
-      for (let i = newerChat.length - 1; i >= 0; i--) {
-        chatListElement.insertBefore(createChatEntityElement(newerChat[i]), chatListElement.firstChild);
+      const scrollMargin = 16;
+      if (mainBodyElement.scrollTop + scrollMargin >= mainBodyElement.scrollHeight - mainBodyElement.clientHeight) {
+        scroll.needScroll(() => chatListElement.firstElementChild);
       }
+      for (let i = newerChat.length - 1; i >= 0; i--) {
+        const e = createChatEntityElement(newerChat[i], session);
+        chatListElement.insertBefore(e, chatListElement.firstElementChild);
+        if (newerChat[i].created_by !== session.nickname) {
+          newMessage.notify(e);
+        }
+      }
+      scroll.scrollIfNeeded();
     },
     loadOlderCallback: (olderChat) => {
       for (let i = 0; i < olderChat.length; i++) {
-        chatListElement.appendChild(createChatEntityElement(olderChat[i]));
+        chatListElement.appendChild(createChatEntityElement(olderChat[i], session));
       }
       if (olderChat.length == 0 || olderChat[olderChat.length - 1].id == 1) {
-        assert(loadMoreElement.parentElement?.parentElement);
-        loadMoreElement.parentElement.parentElement.removeChild(loadMoreElement.parentElement);
+        assert(loadMoreElement.parentElement);
+        loadMoreElement.parentElement.removeChild(loadMoreElement);
       }
     },
   });
@@ -185,15 +344,49 @@ window.addEventListener("DOMContentLoaded", async () => {
     e.preventDefault();
     await doPostChat(sendFormMessageElement.value);
     sendFormElement.reset();
-    sendFormMessageElement.focus();
+    adjustHTMLTextareaElementHeight(sendFormMessageElement);
+    mainBodyElement.focus();
+
+    const firstElement = chatListElement.firstElementChild;
+    scroll.needScroll(() => (firstElement ? firstElement.previousElementSibling : chatListElement.firstElementChild));
     await chat.loadNewer();
   });
 
-  loadMoreElement.addEventListener("click", async (e) => {
-    e.preventDefault();
-    await chat.loadOlder();
+  sendFormMessageElement.addEventListener("input", (e) => {
+    adjustHTMLTextareaElementHeight(sendFormMessageElement);
   });
 
+  newMessageElement.addEventListener("click", async (e) => {
+    e.preventDefault();
+    scroll.needScroll(() => newMessage.current());
+    scroll.scrollIfNeeded();
+  });
+
+  adjustHTMLTextareaElementHeight(sendFormMessageElement);
+  mainBodyElement.focus();
+
   await chat.loadOlder();
+  scroll.needScroll(() => chatListElement.firstElementChild);
+  scroll.scrollIfNeeded();
+
+  setTimeout(() => {
+    observeLoadMore({
+      root: mainBodyElement,
+      target: loadMoreElement,
+      loadCallback: async () => {
+        await chat.loadOlder();
+      },
+      preLoadCallback: async () => {
+        assert(loadMoreElement.firstElementChild);
+        loadMoreElement.firstElementChild.classList.remove("invisible");
+        await sleep(1 * 1000);
+      },
+      postLoadCallback: async () => {
+        assert(loadMoreElement.firstElementChild);
+        loadMoreElement.firstElementChild.classList.add("invisible");
+      },
+    });
+  }, 1 * 1000);
+
   setInterval(async () => await chat.loadNewer(), query.interval);
 });
