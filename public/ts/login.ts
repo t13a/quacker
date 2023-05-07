@@ -24,6 +24,10 @@ window.addEventListener("DOMContentLoaded", async () => {
       assert(avatarElement.firstElementChild);
       avatarElement.firstElementChild.removeAttribute("width");
       avatarElement.firstElementChild.removeAttribute("height");
+    } else {
+      const questionIconElement = document.createElement("i");
+      questionIconElement.classList.add("bi", "bi-person-fill", "position-absolute", "start-50", "top-50", "translate-middle", "text-dark");
+      avatarElement.appendChild(questionIconElement);
     }
   };
 

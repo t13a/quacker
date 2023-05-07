@@ -1,4 +1,8 @@
 @use "sass:math";
+
+$primary: Teal;
+$info: DodgerBlue;
+
 @import "bootstrap/scss/bootstrap";
 @import "bootstrap-icons/font/bootstrap-icons.min.css";
 
@@ -6,6 +10,10 @@
 .avatar > svg {
   height: 3rem;
   width: 3rem;
+}
+
+.avatar > i::before {
+  font-size: 2rem;
 }
 
 .outline-none-focus:focus {
@@ -34,6 +42,15 @@
 
 .resize-none {
   resize: none;
+}
+
+.text-gradient {
+  display: inline-block;
+  background: linear-gradient(120deg, Teal, Turquoise 75%, Cyan);
+  background: -webkit-linear-gradient(30deg, Teal, Turquoise 75%, Cyan);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .white-space-pre-wrap {
